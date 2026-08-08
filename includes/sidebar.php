@@ -83,6 +83,15 @@ $currentRequest = $_SERVER['REQUEST_URI'];
             </li>
             <?php endif; ?>
             
+            <?php if (hasPermission($pdo, 'payments', 'view')): ?>
+            <li class="nav-item">
+                <a class="nav-link <?php echo strpos($currentRequest, 'modules/payments') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/payments/list.php">
+                    <i class="fas fa-dollar-sign"></i>
+                    <span class="nav-text">Payments</span>
+                </a>
+            </li>
+            <?php endif; ?>
+            
             <?php if (hasRole(['Admin'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo strpos($currentRequest, 'modules/roles') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/roles/list.php">

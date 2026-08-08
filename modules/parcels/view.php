@@ -279,7 +279,56 @@ require_once '../../includes/header.php';
         </div>
         
         <div class="col-lg-4">
+            <!-- Payment Summary Card -->
             <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Payment Summary</h5>
+                    
+                    <?php
+                    try {
+                        require_once '../payments/helpers.php';
+                        $paymentData = getOrCreatePaymentRecord($pdo, $parcelId);
+                    } catch (Exception $e) {
+                        $paymentData = null;
+                    }
+                    ?>
+                    
+                    <?php if ($paymentData): ?>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Payment Status</label>
+                        <div>
+                            <span class="badge bg-<?php echo getPaymentStatusBadgeClass($paymentData['payment_status']); ?> fs-6">
+                                <?php echo formatPaymentStatus($paymentData['payment_status']); ?>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-muted">Paid Amount</label>
+                            <div class="form-control-plaintext fw-bold text-success"><?php echo number_format($paymentData['paid_amount'], 2); ?></div>
+                        </div>
+                        
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-muted">Due Amount</label>
+                            <div class="form-control-plaintext fw-bold <?php echo $paymentData['due_amount'] > 0 ? 'text-danger' : 'text-success'; ?>">
+                                <?php echo number_format($paymentData['due_amount'], 2); ?>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <a href="<?php echo BASE_URL; ?>modules/payments/view.php?id=<?php echo $paymentData['id']; ?>" class="btn btn-sm btn-info w-100">
+                            <i class="fas fa-dollar-sign"></i> View Payment Details
+                        </a>
+                    </div>
+                    <?php else: ?>
+                    <p class="text-muted">Payment information not available.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
                 <div class="card-body">
                     <h5 class="card-title mb-4">Status Timeline</h5>
                     
