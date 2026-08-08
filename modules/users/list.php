@@ -9,12 +9,10 @@ require_once '../../config/db.php';
 
 // Check if user has permission
 if (!hasRole(['Admin'])) {
+    setFlashMessage('error', 'Access denied. You do not have permission to access this module.');
     header('Location: ' . BASE_URL . 'dashboard.php');
     exit;
 }
-
-$success = '';
-$error = '';
 
 // Handle search/filter
 $search = trim($_GET['search'] ?? '');
@@ -46,7 +44,7 @@ try {
     $roles = $stmt->fetchAll();
 } catch (PDOException $e) {
     error_log("User List Error: " . $e->getMessage());
-    $error = 'An error occurred while loading users';
+    setFlashMessage('error', 'An error occurred while loading users');
     $users = [];
     $roles = [];
 }
@@ -61,13 +59,7 @@ require_once '../../includes/header.php';
         </div>
     </div>
     
-    <?php if ($success): ?>
-        <div class="alert alert-success"><?php echo $success; ?></div>
-    <?php endif; ?>
-    
-    <?php if ($error): ?>
-        <div class="alert alert-danger"><?php echo $error; ?></div>
-    <?php endif; ?>
+    <?php echo displayFlashMessages(); ?>
     
     <div class="card">
         <div class="card-body">

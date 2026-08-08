@@ -8,6 +8,7 @@ require_once '../../config/db.php';
 
 // Check if user has permission
 if (!hasRole(['Admin'])) {
+    setFlashMessage('error', 'Access denied. You do not have permission to perform this action.');
     header('Location: ' . BASE_URL . 'dashboard.php');
     exit;
 }
@@ -15,13 +16,15 @@ if (!hasRole(['Admin'])) {
 $userId = $_GET['id'] ?? 0;
 
 if (!$userId) {
+    setFlashMessage('error', 'Invalid user ID.');
     header('Location: ' . BASE_URL . 'modules/users/list.php');
     exit;
 }
 
 // Prevent deleting own account
 if ($userId == $_SESSION['user_id']) {
-    header('Location: ' . BASE_URL . 'modules/users/list.php?error=' . urlencode('You cannot deactivate your own account'));
+    setFlashMessage('error', 'You cannot deactivate your own account.');
+    header('Location: ' . BASE_URL . 'modules/users/list.php');
     exit;
 }
 
@@ -32,7 +35,8 @@ try {
     $user = $stmt->fetch();
     
     if (!$user) {
-        header('Location: ' . BASE_URL . 'modules/users/list.php?error=' . urlencode('User not found'));
+        setFlashMessage('error', 'User not found.');
+        header('Location: ' . BASE_URL . 'modules/users/list.php');
         exit;
     }
     
@@ -42,10 +46,12 @@ try {
     $stmt->execute(['is_active' => $newStatus, 'id' => $userId]);
     
     $message = $newStatus ? 'User activated successfully' : 'User deactivated successfully';
-    header('Location: ' . BASE_URL . 'modules/users/list.php?success=' . urlencode($message));
+    setFlashMessage('success', $message);
+    header('Location: ' . BASE_URL . 'modules/users/list.php');
     exit;
 } catch (PDOException $e) {
     error_log("Toggle User Status Error: " . $e->getMessage());
-    header('Location: ' . BASE_URL . 'modules/users/list.php?error=' . urlencode('An error occurred while updating user status'));
+    setFlashMessage('error', 'An error occurred while updating user status.');
+    header('Location: ' . BASE_URL . 'modules/users/list.php');
     exit;
 }

@@ -16,11 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate input
     if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
-        $error = 'All fields are required';
+        setFlashMessage('error', 'All fields are required');
     } elseif (strlen($newPassword) < 6) {
-        $error = 'New password must be at least 6 characters';
+        setFlashMessage('error', 'New password must be at least 6 characters');
     } elseif ($newPassword !== $confirmPassword) {
-        $error = 'New password and confirm password do not match';
+        setFlashMessage('error', 'New password and confirm password do not match');
     } else {
         try {
             // Get current user's password
@@ -36,13 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
                 $stmt->execute(['password' => $newPasswordHash, 'id' => $_SESSION['user_id']]);
                 
-                $success = 'Password changed successfully';
+                setFlashMessage('success', 'Password changed successfully');
             } else {
-                $error = 'Current password is incorrect';
+                setFlashMessage('error', 'Current password is incorrect');
             }
         } catch (PDOException $e) {
             error_log("Password Change Error: " . $e->getMessage());
-            $error = 'An error occurred while changing your password';
+            setFlashMessage('error', 'An error occurred while changing your password');
         }
     }
 }
@@ -57,13 +57,7 @@ require_once '../../includes/header.php';
                 <div class="card-body">
                     <h5 class="card-title mb-4">Change Password</h5>
                     
-                    <?php if ($success): ?>
-                        <div class="alert alert-success"><?php echo $success; ?></div>
-                    <?php endif; ?>
-                    
-                    <?php if ($error): ?>
-                        <div class="alert alert-danger"><?php echo $error; ?></div>
-                    <?php endif; ?>
+                    <?php echo displayFlashMessages(); ?>
                     
                     <form method="POST" id="passwordForm">
                         <div class="mb-3">

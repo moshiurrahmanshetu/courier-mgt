@@ -195,6 +195,114 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Create customer form validation
+    const createCustomerForm = document.getElementById('createCustomerForm');
+    if (createCustomerForm) {
+        createCustomerForm.addEventListener('submit', function(event) {
+            const fullName = document.getElementById('full_name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const cityArea = document.getElementById('city_area').value.trim();
+            
+            let isValid = true;
+            
+            // Reset previous error states
+            document.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            
+            // Validate full name
+            if (!fullName) {
+                document.getElementById('full_name').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate phone
+            if (!phone) {
+                document.getElementById('phone').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate email (optional but must be valid if provided)
+            if (email && !isValidEmail(email)) {
+                document.getElementById('email').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate address
+            if (!address) {
+                document.getElementById('address').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate city/area
+            if (!cityArea) {
+                document.getElementById('city_area').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    }
+    
+    // Edit customer form validation
+    const editCustomerForm = document.getElementById('editCustomerForm');
+    if (editCustomerForm) {
+        editCustomerForm.addEventListener('submit', function(event) {
+            const fullName = document.getElementById('full_name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const cityArea = document.getElementById('city_area').value.trim();
+            
+            let isValid = true;
+            
+            // Reset previous error states
+            document.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            
+            // Validate full name
+            if (!fullName) {
+                document.getElementById('full_name').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate phone
+            if (!phone) {
+                document.getElementById('phone').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate email (optional but must be valid if provided)
+            if (email && !isValidEmail(email)) {
+                document.getElementById('email').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate address
+            if (!address) {
+                document.getElementById('address').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Validate city/area
+            if (!cityArea) {
+                document.getElementById('city_area').classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    }
 });
 
 // Email validation helper function
@@ -205,7 +313,7 @@ function isValidEmail(email) {
 
 // Real-time validation feedback
 document.addEventListener('input', function(event) {
-    if (event.target.classList.contains('form-control') || event.target.classList.contains('form-select')) {
+    if (event.target.classList.contains('form-control') || event.target.classList.contains('form-select') || event.target.tagName === 'TEXTAREA') {
         if (event.target.checkValidity()) {
             event.target.classList.remove('is-invalid');
             event.target.classList.add('is-valid');

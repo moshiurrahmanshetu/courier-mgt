@@ -18,16 +18,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate input
     if (empty($fullName) || empty($email)) {
-        $error = 'Full name and email are required';
+        setFlashMessage('error', 'Full name and email are required');
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Invalid email format';
+        setFlashMessage('error', 'Invalid email format');
     } else {
         try {
             // Check if email is already taken by another user
             $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email AND id != :id");
             $stmt->execute(['email' => $email, 'id' => $_SESSION['user_id']]);
             if ($stmt->fetch()) {
-                $error = 'Email is already in use by another user';
+                setFlashMessage('error', 'Email is already in use by another user');
             } else {
                 // Update user profile
                 $stmt = $pdo->prepare("UPDATE users SET full_name = :full_name, email = :email, phone = :phone WHERE id = :id");
@@ -43,11 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['email'] = $email;
                 $_SESSION['phone'] = $phone;
                 
-                $success = 'Profile updated successfully';
+                setFlashMessage('success', 'Profile updated successfully');
             }
         } catch (PDOException $e) {
             error_log("Profile Update Error: " . $e->getMessage());
-            $error = 'An error occurred while updating your profile';
+            setFlashMessage('error', 'An error occurred while updating your profile');
         }
     }
 }
@@ -62,9 +62,9 @@ if (isset($_POST['upload_avatar']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $fileSize = $_FILES['avatar']['size'];
         
         if (!in_array($fileType, $allowedTypes)) {
-            $error = 'Only JPG, JPEG, and PNG files are allowed';
+            setFlashMessage('error', 'Only JPG, JPEG, and PNG files are allowed');
         } elseif ($fileSize > $maxSize) {
-            $error = 'File size must be less than 2MB';
+            setFlashMessage('error', 'File size must be less than 2MB');
         } else {
             $fileExt = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
             $newFileName = 'user_' . $_SESSION['user_id'] . '_' . time() . '.' . $fileExt;
@@ -85,17 +85,17 @@ if (isset($_POST['upload_avatar']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Update session
                     $_SESSION['avatar'] = $newFileName;
                     
-                    $success = 'Avatar updated successfully';
+                    setFlashMessage('success', 'Avatar updated successfully');
                 } catch (PDOException $e) {
                     error_log("Avatar Upload Error: " . $e->getMessage());
-                    $error = 'An error occurred while updating your avatar';
+                    setFlashMessage('error', 'An error occurred while updating your avatar');
                 }
             } else {
-                $error = 'Failed to upload file';
+                setFlashMessage('error', 'Failed to upload file');
             }
         }
     } else {
-        $error = 'Please select a file to upload';
+        setFlashMessage('error', 'Please select a file to upload');
     }
 }
 
@@ -106,7 +106,7 @@ try {
     $user = $stmt->fetch();
 } catch (PDOException $e) {
     error_log("Profile Fetch Error: " . $e->getMessage());
-    $error = 'An error occurred while loading your profile';
+    setFlashMessage('error', 'An error occurred while loading your profile');
     $user = [
         'full_name' => $_SESSION['full_name'],
         'email' => $_SESSION['email'],
@@ -142,13 +142,7 @@ require_once '../../includes/header.php';
                 <div class="card-body">
                     <h5 class="card-title mb-4">Personal Information</h5>
                     
-                    <?php if ($success): ?>
-                        <div class="alert alert-success"><?php echo $success; ?></div>
-                    <?php endif; ?>
-                    
-                    <?php if ($error): ?>
-                        <div class="alert alert-danger"><?php echo $error; ?></div>
-                    <?php endif; ?>
+                    <?php echo displayFlashMessages(); ?>
                     
                     <form method="POST" id="profileForm">
                         <div class="mb-3">

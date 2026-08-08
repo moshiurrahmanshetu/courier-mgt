@@ -16,12 +16,10 @@ if (!hasRole(['Admin'])) {
 $userId = $_GET['id'] ?? 0;
 
 if (!$userId) {
+    setFlashMessage('error', 'Invalid user ID.');
     header('Location: ' . BASE_URL . 'modules/users/list.php');
     exit;
 }
-
-$success = '';
-$error = '';
 
 // Handle user update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -33,16 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate input
     if (empty($fullName) || empty($email) || empty($roleId)) {
-        $error = 'Please fill in all required fields';
+        setFlashMessage('error', 'Please fill in all required fields');
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Invalid email format';
+        setFlashMessage('error', 'Invalid email format');
     } else {
         try {
             // Check if email is already taken by another user
             $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email AND id != :id");
             $stmt->execute(['email' => $email, 'id' => $userId]);
             if ($stmt->fetch()) {
-                $error = 'Email is already in use by another user';
+                setFlashMessage('error', 'Email is already in use by another user');
             } else {
                 // Update user
                 $stmt = $pdo->prepare("UPDATE users SET full_name = :full_name, email = :email, phone = :phone, role_id = :role_id, is_active = :is_active WHERE id = :id");
@@ -55,11 +53,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'id' => $userId
                 ]);
                 
-                $success = 'User updated successfully';
+                setFlashMessage('success', 'User updated successfully');
+                header('Location: ' . BASE_URL . 'modules/users/list.php');
+                exit;
             }
         } catch (PDOException $e) {
             error_log("Edit User Error: " . $e->getMessage());
-            $error = 'An error occurred while updating the user';
+            setFlashMessage('error', 'An error occurred while updating the user');
         }
     }
 }
@@ -70,21 +70,21 @@ if (isset($_POST['reset_password']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirmPassword = $_POST['confirm_password'] ?? '';
     
     if (empty($newPassword) || empty($confirmPassword)) {
-        $error = 'Please fill in both password fields';
+        setFlashMessage('error', 'Please fill in both password fields');
     } elseif (strlen($newPassword) < 6) {
-        $error = 'Password must be at least 6 characters';
+        setFlashMessage('error', 'Password must be at least 6 characters');
     } elseif ($newPassword !== $confirmPassword) {
-        $error = 'Password and confirm password do not match';
+        setFlashMessage('error', 'Password and confirm password do not match');
     } else {
         try {
             $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("UPDATE users SET password = :password WHERE id = :id");
             $stmt->execute(['password' => $passwordHash, 'id' => $userId]);
             
-            $success = 'Password reset successfully';
+            setFlashMessage('success', 'Password reset successfully');
         } catch (PDOException $e) {
             error_log("Password Reset Error: " . $e->getMessage());
-            $error = 'An error occurred while resetting the password';
+            setFlashMessage('error', 'An error occurred while resetting the password');
         }
     }
 }
@@ -96,12 +96,13 @@ try {
     $user = $stmt->fetch();
     
     if (!$user) {
+        setFlashMessage('error', 'User not found.');
         header('Location: ' . BASE_URL . 'modules/users/list.php');
         exit;
     }
 } catch (PDOException $e) {
     error_log("Fetch User Error: " . $e->getMessage());
-    $error = 'An error occurred while loading user data';
+    setFlashMessage('error', 'An error occurred while loading user data');
     $user = [];
 }
 
@@ -134,13 +135,7 @@ require_once '../../includes/header.php';
         </div>
     </div>
     
-    <?php if ($success): ?>
-        <div class="alert alert-success"><?php echo $success; ?></div>
-    <?php endif; ?>
-    
-    <?php if ($error): ?>
-        <div class="alert alert-danger"><?php echo $error; ?></div>
-    <?php endif; ?>
+    <?php echo displayFlashMessages(); ?>
     
     <div class="row">
         <div class="col-lg-4">

@@ -27,26 +27,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Validate input
     if (empty($fullName) || empty($email) || empty($username) || empty($password) || empty($roleId)) {
-        $error = 'Please fill in all required fields';
+        setFlashMessage('error', 'Please fill in all required fields');
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Invalid email format';
+        setFlashMessage('error', 'Invalid email format');
     } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters';
+        setFlashMessage('error', 'Password must be at least 6 characters');
     } elseif ($password !== $confirmPassword) {
-        $error = 'Password and confirm password do not match';
+        setFlashMessage('error', 'Password and confirm password do not match');
     } else {
         try {
             // Check if username already exists
             $stmt = $pdo->prepare("SELECT id FROM users WHERE username = :username");
             $stmt->execute(['username' => $username]);
             if ($stmt->fetch()) {
-                $error = 'Username already exists';
+                setFlashMessage('error', 'Username already exists');
             } else {
                 // Check if email already exists
                 $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
                 $stmt->execute(['email' => $email]);
                 if ($stmt->fetch()) {
-                    $error = 'Email already exists';
+                    setFlashMessage('error', 'Email already exists');
                 } else {
                     // Hash password
                     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
@@ -62,14 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'role_id' => $roleId
                     ]);
                     
-                    $success = 'User created successfully';
-                    // Clear form
-                    $_POST = [];
+                    setFlashMessage('success', 'User created successfully');
+                    header('Location: ' . BASE_URL . 'modules/users/list.php');
+                    exit;
                 }
             }
         } catch (PDOException $e) {
             error_log("Create User Error: " . $e->getMessage());
-            $error = 'An error occurred while creating the user';
+            setFlashMessage('error', 'An error occurred while creating the user');
         }
     }
 }
@@ -93,16 +93,7 @@ require_once '../../includes/header.php';
                 <div class="card-body">
                     <h5 class="card-title mb-4">Add New User</h5>
                     
-                    <?php if ($success): ?>
-                        <div class="alert alert-success">
-                            <?php echo $success; ?>
-                            <a href="<?php echo BASE_URL; ?>modules/users/list.php" class="btn btn-sm btn-primary ms-2">View Users</a>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <?php if ($error): ?>
-                        <div class="alert alert-danger"><?php echo $error; ?></div>
-                    <?php endif; ?>
+                    <?php echo displayFlashMessages(); ?>
                     
                     <form method="POST" id="createUserForm">
                         <div class="row">
