@@ -1,0 +1,10 @@
+PLACEHOLDER: This file should be replaced with an actual PNG image.
+
+For now, the system will handle missing avatar images gracefully.
+To add a real default avatar:
+1. Create or download a 200x200 PNG image
+2. Save it as "default-avatar.png" in this folder
+3. Recommended: Simple silhouette or icon-style avatar
+
+Temporary solution: The profile.php page will show a broken image icon if this file is missing,
+but the system will continue to function.
