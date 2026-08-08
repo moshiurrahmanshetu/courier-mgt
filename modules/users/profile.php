@@ -104,12 +104,19 @@ try {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
     $stmt->execute(['id' => $_SESSION['user_id']]);
     $user = $stmt->fetch();
+    
+    // If user not found in database, destroy session and redirect to login
+    if (!$user) {
+        session_destroy();
+        header('Location: ' . BASE_URL . 'auth/login.php?error=session_invalid');
+        exit;
+    }
 } catch (PDOException $e) {
     error_log("Profile Fetch Error: " . $e->getMessage());
     setFlashMessage('error', 'An error occurred while loading your profile');
     $user = [
-        'full_name' => $_SESSION['full_name'],
-        'email' => $_SESSION['email'],
+        'full_name' => $_SESSION['full_name'] ?? '',
+        'email' => $_SESSION['email'] ?? '',
         'phone' => $_SESSION['phone'] ?? ''
     ];
 }

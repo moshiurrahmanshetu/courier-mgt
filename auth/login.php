@@ -3,6 +3,16 @@ if (!defined('BASE_URL')) {
     require_once '../config/config.php';
 }
 
+// Check if system is installed
+$lockFile = __DIR__ . '/../config/installed.lock';
+$configFile = __DIR__ . '/../config/config.php';
+
+// If not installed, redirect to installer
+if (!file_exists($lockFile) || !file_exists($configFile)) {
+    header('Location: ../installer/index.php');
+    exit;
+}
+
 // If already logged in, redirect to dashboard
 if (isset($_SESSION['user_id'])) {
     header('Location: ' . BASE_URL . 'dashboard.php');

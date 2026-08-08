@@ -92,6 +92,43 @@ $currentRequest = $_SERVER['REQUEST_URI'];
             </li>
             <?php endif; ?>
             
+            <?php if (hasPermission($pdo, 'reports', 'view')): ?>
+            <li class="nav-item">
+                <a class="nav-link <?php echo strpos($currentRequest, 'modules/reports') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/reports/parcel-report.php">
+                    <i class="fas fa-chart-bar"></i>
+                    <span class="nav-text">Reports</span>
+                </a>
+                <?php if (strpos($currentRequest, 'modules/reports') !== false): ?>
+                <ul class="nav flex-column ms-3">
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo strpos($currentRequest, 'parcel-report.php') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/reports/parcel-report.php">
+                            <i class="fas fa-box"></i>
+                            <span class="nav-text">Parcel Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo strpos($currentRequest, 'delivery-report.php') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/reports/delivery-report.php">
+                            <i class="fas fa-truck"></i>
+                            <span class="nav-text">Delivery Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo strpos($currentRequest, 'customer-report.php') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/reports/customer-report.php">
+                            <i class="fas fa-users"></i>
+                            <span class="nav-text">Customer Report</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo strpos($currentRequest, 'payment-report.php') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/reports/payment-report.php">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span class="nav-text">Payment Report</span>
+                        </a>
+                    </li>
+                </ul>
+                <?php endif; ?>
+            </li>
+            <?php endif; ?>
+            
             <?php if (hasRole(['Admin'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo strpos($currentRequest, 'modules/roles') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/roles/list.php">

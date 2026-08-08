@@ -17,7 +17,7 @@ $avatarPath = (!empty($_SESSION['avatar'])) ? BASE_URL . 'assets/images/avatars/
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark top-navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark top-navbar sticky-top">
         <div class="container-fluid">
             <button class="btn btn-link text-white sidebar-toggle" id="sidebarToggle">
                 <i class="fas fa-bars"></i>
