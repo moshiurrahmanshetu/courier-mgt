@@ -45,6 +45,44 @@ $currentRequest = $_SERVER['REQUEST_URI'];
             </li>
             <?php endif; ?>
             
+            <?php if (hasRole(['Delivery Staff'])): ?>
+            <li class="nav-item">
+                <a class="nav-link <?php echo strpos($currentRequest, 'modules/delivery/my-deliveries.php') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/delivery/my-deliveries.php">
+                    <i class="fas fa-truck"></i>
+                    <span class="nav-text">My Deliveries</span>
+                </a>
+            </li>
+            <?php elseif (hasPermission($pdo, 'delivery', 'view')): ?>
+            <li class="nav-item">
+                <a class="nav-link <?php echo strpos($currentRequest, 'modules/delivery/staff-list.php') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/delivery/staff-list.php">
+                    <i class="fas fa-truck"></i>
+                    <span class="nav-text">Delivery</span>
+                </a>
+                <?php if (strpos($currentRequest, 'modules/delivery') !== false): ?>
+                <ul class="nav flex-column ms-3">
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo strpos($currentRequest, 'staff-list.php') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/delivery/staff-list.php">
+                            <i class="fas fa-users"></i>
+                            <span class="nav-text">Staff Workload</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo strpos($currentRequest, 'assign.php') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/delivery/assign.php">
+                            <i class="fas fa-tasks"></i>
+                            <span class="nav-text">Assign Parcels</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo strpos($currentRequest, 'assigned-list.php') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/delivery/assigned-list.php">
+                            <i class="fas fa-list"></i>
+                            <span class="nav-text">All Deliveries</span>
+                        </a>
+                    </li>
+                </ul>
+                <?php endif; ?>
+            </li>
+            <?php endif; ?>
+            
             <?php if (hasRole(['Admin'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo strpos($currentRequest, 'modules/roles') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/roles/list.php">

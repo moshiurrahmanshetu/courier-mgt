@@ -9,7 +9,17 @@ require_once '../../config/db.php';
 require_once 'helpers.php';
 
 // Check if user has permission
-if (!hasPermission($pdo, 'parcels', 'view')) {
+$hasAccess = hasPermission($pdo, 'parcels', 'view');
+
+// Allow Delivery Staff to view parcels assigned to them
+if (!$hasAccess && hasRole(['Delivery Staff'])) {
+    // We'll check after fetching the parcel if it's assigned to this user
+    $checkDeliveryStaffAccess = true;
+} else {
+    $checkDeliveryStaffAccess = false;
+}
+
+if (!$hasAccess && !$checkDeliveryStaffAccess) {
     setFlashMessage('error', 'Access denied. You do not have permission to access this module.');
     header('Location: ' . BASE_URL . 'dashboard.php');
     exit;
@@ -43,6 +53,16 @@ try {
         exit;
     }
     
+    // Check Delivery Staff access if that's the access method
+    if ($checkDeliveryStaffAccess) {
+        if ($parcel['delivery_staff_id'] != $_SESSION['user_id']) {
+            setFlashMessage('error', 'Access denied. This parcel is not assigned to you.');
+            header('Location: ' . BASE_URL . 'modules/delivery/my-deliveries.php');
+            exit;
+        }
+        $hasAccess = true; // Grant access since it's their parcel
+    }
+    
     // Fetch status timeline
     $stmt = $pdo->prepare("
         SELECT psl.*, 
@@ -63,6 +83,11 @@ try {
 }
 
 $canEdit = hasPermission($pdo, 'parcels', 'edit') && in_array($parcel['current_status'], ['pending', 'picked_up']);
+
+// Delivery Staff can update status for their assigned parcels if in out_for_delivery or failed_delivery
+$canUpdateDeliveryStatus = hasRole(['Delivery Staff']) && 
+                            $parcel['delivery_staff_id'] == $_SESSION['user_id'] && 
+                            in_array($parcel['current_status'], ['out_for_delivery', 'failed_delivery']);
 
 require_once '../../includes/header.php';
 ?>
@@ -237,7 +262,17 @@ require_once '../../includes/header.php';
                         </a>
                         <?php endif; ?>
                         
+                        <?php if ($canUpdateDeliveryStatus): ?>
+                        <a href="<?php echo BASE_URL; ?>modules/delivery/update-delivery-status.php?id=<?php echo $parcel['id']; ?>" class="btn btn-warning">
+                            <i class="fas fa-exchange-alt"></i> Update Delivery Status
+                        </a>
+                        <?php endif; ?>
+                        
+                        <?php if ($checkDeliveryStaffAccess): ?>
+                        <a href="<?php echo BASE_URL; ?>modules/delivery/my-deliveries.php" class="btn btn-secondary">Back to My Deliveries</a>
+                        <?php else: ?>
                         <a href="<?php echo BASE_URL; ?>modules/parcels/list.php" class="btn btn-secondary">Back to List</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -297,9 +332,21 @@ require_once '../../includes/header.php';
                         </a>
                         <?php endif; ?>
                         
+                        <?php if ($canUpdateDeliveryStatus): ?>
+                        <a href="<?php echo BASE_URL; ?>modules/delivery/update-delivery-status.php?id=<?php echo $parcel['id']; ?>" class="btn btn-warning">
+                            <i class="fas fa-exchange-alt"></i> Update Delivery Status
+                        </a>
+                        <?php endif; ?>
+                        
+                        <?php if ($checkDeliveryStaffAccess): ?>
+                        <a href="<?php echo BASE_URL; ?>modules/delivery/my-deliveries.php" class="btn btn-secondary">
+                            <i class="fas fa-list"></i> Back to My Deliveries
+                        </a>
+                        <?php else: ?>
                         <a href="<?php echo BASE_URL; ?>modules/parcels/list.php" class="btn btn-secondary">
                             <i class="fas fa-list"></i> Back to List
                         </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
