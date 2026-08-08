@@ -33,6 +33,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['avatar'] = $user['avatar'];
             $_SESSION['phone'] = $user['phone'];
             
+            // Cache user permissions in session
+            try {
+                $stmt = $pdo->prepare("
+                    SELECT p.permission_key 
+                    FROM role_permissions rp
+                    JOIN permissions p ON rp.permission_id = p.id
+                    WHERE rp.role_id = :role_id
+                ");
+                $stmt->execute(['role_id' => $user['role_id']]);
+                $permissions = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                $_SESSION['permissions'] = $permissions;
+            } catch (PDOException $e) {
+                // If permissions table doesn't exist yet, set empty array
+                error_log("Permission Fetch Error: " . $e->getMessage());
+                $_SESSION['permissions'] = [];
+            }
+            
             // Redirect to dashboard
             header('Location: ' . BASE_URL . 'dashboard.php');
             exit;

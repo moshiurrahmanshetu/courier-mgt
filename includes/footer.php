@@ -1,6 +1,7 @@
 <?php
 // Courier Management System - Footer
 // Created: 2026-08-08
+require_once __DIR__ . '/../config/db.php';
 ?>
         </main>
     </div>

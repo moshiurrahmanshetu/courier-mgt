@@ -6,8 +6,8 @@ require_once '../../includes/auth_check.php';
 require_once '../../config/db.php';
 require_once '../../includes/role_check.php';
 
-// Check if user has permission (Admin or Staff only)
-if (!hasRole(['Admin', 'Staff'])) {
+// Check if user has permission
+if (!hasPermission($pdo, 'customers', 'delete')) {
     setFlashMessage('error', 'Access denied. You do not have permission to perform this action.');
     header('Location: ' . BASE_URL . 'dashboard.php');
     exit;

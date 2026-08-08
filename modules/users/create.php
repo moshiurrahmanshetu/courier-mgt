@@ -8,7 +8,8 @@ require_once '../../includes/role_check.php';
 require_once '../../config/db.php';
 
 // Check if user has permission
-if (!hasRole(['Admin'])) {
+if (!hasPermission($pdo, 'users', 'create')) {
+    setFlashMessage('error', 'Access denied. You do not have permission to access this module.');
     header('Location: ' . BASE_URL . 'dashboard.php');
     exit;
 }

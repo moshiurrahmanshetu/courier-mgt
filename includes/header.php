@@ -2,6 +2,7 @@
 // Courier Management System - Header
 // Created: 2026-08-08
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/role_check.php';
 
 $avatarPath = (!empty($_SESSION['avatar'])) ? BASE_URL . 'assets/images/avatars/' . $_SESSION['avatar'] : BASE_URL . 'assets/images/avatars/default-avatar.svg';

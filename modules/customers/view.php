@@ -7,8 +7,8 @@ require_once '../../includes/auth_check.php';
 require_once '../../includes/role_check.php';
 require_once '../../config/db.php';
 
-// Check if user has permission (Admin or Staff only)
-if (!hasRole(['Admin', 'Staff'])) {
+// Check if user has permission
+if (!hasPermission($pdo, 'customers', 'view')) {
     setFlashMessage('error', 'Access denied. You do not have permission to access this module.');
     header('Location: ' . BASE_URL . 'dashboard.php');
     exit;
@@ -134,9 +134,11 @@ require_once '../../includes/header.php';
                     </div>
                     
                     <div class="mt-4">
+                        <?php if (hasPermission($pdo, 'customers', 'edit')): ?>
                         <a href="<?php echo BASE_URL; ?>modules/customers/edit.php?id=<?php echo $customer['id']; ?>" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit Customer
                         </a>
+                        <?php endif; ?>
                         <a href="<?php echo BASE_URL; ?>modules/customers/list.php" class="btn btn-secondary">Back to List</a>
                     </div>
                 </div>
@@ -149,26 +151,30 @@ require_once '../../includes/header.php';
                     <h5 class="card-title mb-4">Quick Actions</h5>
                     
                     <div class="d-grid gap-2">
+                        <?php if (hasPermission($pdo, 'customers', 'edit')): ?>
                         <a href="<?php echo BASE_URL; ?>modules/customers/edit.php?id=<?php echo $customer['id']; ?>" class="btn btn-primary">
                             <i class="fas fa-edit"></i> Edit Customer
                         </a>
+                        <?php endif; ?>
                         
-                        <?php if ($customer['is_deleted'] == 0): ?>
-                            <form method="POST" action="toggle-status.php" onsubmit="return confirm('Are you sure you want to delete this customer?');">
-                                <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
-                                <input type="hidden" name="action" value="soft-delete">
-                                <button type="submit" class="btn btn-danger w-100">
-                                    <i class="fas fa-trash"></i> Delete Customer
-                                </button>
-                            </form>
-                        <?php else: ?>
-                            <form method="POST" action="toggle-status.php" onsubmit="return confirm('Are you sure you want to restore this customer?');">
-                                <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
-                                <input type="hidden" name="action" value="restore">
-                                <button type="submit" class="btn btn-success w-100">
-                                    <i class="fas fa-undo"></i> Restore Customer
-                                </button>
-                            </form>
+                        <?php if (hasPermission($pdo, 'customers', 'delete')): ?>
+                            <?php if ($customer['is_deleted'] == 0): ?>
+                                <form method="POST" action="toggle-status.php" onsubmit="return confirm('Are you sure you want to delete this customer?');">
+                                    <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
+                                    <input type="hidden" name="action" value="soft-delete">
+                                    <button type="submit" class="btn btn-danger w-100">
+                                        <i class="fas fa-trash"></i> Delete Customer
+                                    </button>
+                                </form>
+                            <?php else: ?>
+                                <form method="POST" action="toggle-status.php" onsubmit="return confirm('Are you sure you want to restore this customer?');">
+                                    <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
+                                    <input type="hidden" name="action" value="restore">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-undo"></i> Restore Customer
+                                    </button>
+                                </form>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>

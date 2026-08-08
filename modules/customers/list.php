@@ -7,8 +7,8 @@ require_once '../../includes/auth_check.php';
 require_once '../../config/db.php';
 require_once '../../includes/role_check.php';
 
-// Check if user has permission (Admin or Staff only)
-if (!hasRole(['Admin', 'Staff'])) {
+// Check if user has permission
+if (!hasPermission($pdo, 'customers', 'view')) {
     setFlashMessage('error', 'Access denied. You do not have permission to access this module.');
     header('Location: ' . BASE_URL . 'dashboard.php');
     exit;
@@ -123,9 +123,11 @@ require_once '../../includes/header.php';
                 </div>
                 
                 <div class="col-md-2 text-end">
+                    <?php if (hasPermission($pdo, 'customers', 'create')): ?>
                     <a href="<?php echo BASE_URL; ?>modules/customers/create.php" class="btn btn-success">
                         <i class="fas fa-plus"></i> Add Customer
                     </a>
+                    <?php endif; ?>
                 </div>
             </div>
             
@@ -168,34 +170,42 @@ require_once '../../includes/header.php';
                                     </td>
                                     <td><?php echo date('M d, Y', strtotime($customer['created_at'])); ?></td>
                                     <td>
+                                        <?php if (hasPermission($pdo, 'customers', 'view')): ?>
                                         <a href="<?php echo BASE_URL; ?>modules/customers/view.php?id=<?php echo $customer['id']; ?>" 
                                            class="btn btn-sm btn-info" title="View">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        <?php endif; ?>
+                                        
+                                        <?php if (hasPermission($pdo, 'customers', 'edit')): ?>
                                         <a href="<?php echo BASE_URL; ?>modules/customers/edit.php?id=<?php echo $customer['id']; ?>" 
                                            class="btn btn-sm btn-primary" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <?php if ($showDeleted): ?>
-                                            <!-- Restore button for deleted customers -->
-                                            <form method="POST" action="toggle-status.php" style="display: inline;" 
-                                                  onsubmit="return confirm('Are you sure you want to restore this customer?');">
-                                                <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
-                                                <input type="hidden" name="action" value="restore">
-                                                <button type="submit" class="btn btn-sm btn-success" title="Restore">
-                                                    <i class="fas fa-undo"></i>
-                                                </button>
-                                            </form>
-                                        <?php else: ?>
-                                            <!-- Soft delete button for active customers -->
-                                            <form method="POST" action="toggle-status.php" style="display: inline;" 
-                                                  onsubmit="return confirm('Are you sure you want to delete this customer?');">
-                                                <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
-                                                <input type="hidden" name="action" value="soft-delete">
-                                                <button type="submit" class="btn btn-sm btn-danger" title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                        <?php endif; ?>
+                                        
+                                        <?php if (hasPermission($pdo, 'customers', 'delete')): ?>
+                                            <?php if ($showDeleted): ?>
+                                                <!-- Restore button for deleted customers -->
+                                                <form method="POST" action="toggle-status.php" style="display: inline;" 
+                                                      onsubmit="return confirm('Are you sure you want to restore this customer?');">
+                                                    <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
+                                                    <input type="hidden" name="action" value="restore">
+                                                    <button type="submit" class="btn btn-sm btn-success" title="Restore">
+                                                        <i class="fas fa-undo"></i>
+                                                    </button>
+                                                </form>
+                                            <?php else: ?>
+                                                <!-- Soft delete button for active customers -->
+                                                <form method="POST" action="toggle-status.php" style="display: inline;" 
+                                                      onsubmit="return confirm('Are you sure you want to delete this customer?');">
+                                                    <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
+                                                    <input type="hidden" name="action" value="soft-delete">
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
