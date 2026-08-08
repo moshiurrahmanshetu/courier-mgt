@@ -6,6 +6,7 @@ $pageTitle = 'View Customer';
 require_once '../../includes/auth_check.php';
 require_once '../../includes/role_check.php';
 require_once '../../config/db.php';
+require_once '../parcels/helpers.php';
 
 // Check if user has permission
 if (!hasPermission($pdo, 'customers', 'view')) {
@@ -180,14 +181,73 @@ require_once '../../includes/header.php';
                 </div>
             </div>
             
-            <!-- Parcel History Placeholder -->
+            <!-- Parcel History -->
             <div class="card mt-3">
                 <div class="card-body">
                     <h5 class="card-title mb-4">Parcel History</h5>
-                    <p class="text-muted">
-                        <i class="fas fa-box"></i> Parcel list for this customer will be added in Parcel Management phase
-                    </p>
-                    <!-- Parcel list for this customer will be added in Parcel Management phase -->
+                    
+                    <?php
+                    try {
+                        $parcelStmt = $pdo->prepare("
+                            SELECT p.*, 
+                                   CONCAT(u.full_name, ' (', u.username, ')') as delivery_staff_name
+                            FROM parcels p
+                            LEFT JOIN users u ON p.delivery_staff_id = u.id
+                            WHERE p.customer_id = :customer_id AND p.is_deleted = 0
+                            ORDER BY p.booking_date DESC, p.id DESC
+                            LIMIT 10
+                        ");
+                        $parcelStmt->execute(['customer_id' => $customer['id']]);
+                        $customerParcels = $parcelStmt->fetchAll();
+                        
+                        if (empty($customerParcels)): ?>
+                            <p class="text-muted">
+                                <i class="fas fa-box"></i> No parcels found for this customer.
+                            </p>
+                        <?php else: ?>
+                            <div class="table-responsive">
+                                <table class="table table-striped table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Tracking #</th>
+                                            <th>Status</th>
+                                            <th>Booking Date</th>
+                                            <th>COD Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($customerParcels as $parcel): ?>
+                                        <tr>
+                                            <td>
+                                                <a href="<?php echo BASE_URL; ?>modules/parcels/view.php?id=<?php echo $parcel['id']; ?>">
+                                                    <?php echo htmlspecialchars($parcel['tracking_number']); ?>
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-<?php echo getStatusBadgeClass($parcel['current_status']); ?>">
+                                                    <?php echo ucfirst(str_replace('_', ' ', $parcel['current_status'])); ?>
+                                                </span>
+                                            </td>
+                                            <td><?php echo date('M d, Y', strtotime($parcel['booking_date'])); ?></td>
+                                            <td>
+                                                <?php if ($parcel['cod_amount'] > 0): ?>
+                                                    <?php echo number_format($parcel['cod_amount'], 2); ?>
+                                                <?php else: ?>
+                                                    -
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <small class="text-muted">Showing latest 10 parcels</small>
+                        <?php endif;
+                    } catch (PDOException $e) {
+                        error_log("Fetch Customer Parcels Error: " . $e->getMessage());
+                        echo '<p class="text-danger">Error loading parcel history.</p>';
+                    }
+                    ?>
                 </div>
             </div>
         </div>

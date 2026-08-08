@@ -36,6 +36,15 @@ $currentRequest = $_SERVER['REQUEST_URI'];
             </li>
             <?php endif; ?>
             
+            <?php if (hasPermission($pdo, 'parcels', 'view')): ?>
+            <li class="nav-item">
+                <a class="nav-link <?php echo strpos($currentRequest, 'modules/parcels') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/parcels/list.php">
+                    <i class="fas fa-box"></i>
+                    <span class="nav-text">Parcels</span>
+                </a>
+            </li>
+            <?php endif; ?>
+            
             <?php if (hasRole(['Admin'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo strpos($currentRequest, 'modules/roles') !== false ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>modules/roles/list.php">
